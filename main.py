@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 from scraper import extract_info
 from content_processor import save_markdown_from_html
 
@@ -10,9 +11,10 @@ def main():
 
     # define script's required url argument
     parser.add_argument("url", help="Webpage to analyze full url.")
+    default_output_dir = Path.home() / "mtaa-scraping-tool" / "output"
     parser.add_argument(
         "--output-dir",
-        default=".",
+        default=str(default_output_dir),
         help="Directory where the Markdown file will be saved.",
     )
 

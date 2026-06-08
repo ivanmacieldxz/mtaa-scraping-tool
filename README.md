@@ -65,7 +65,10 @@ python main.py https://example.com --output-dir output
 python main.py https://www.python.org
 ```
 
-The script will create a Markdown file named after the page title in the current folder by default.
+By default, the script saves the extracted Markdown under your user home directory at:
+
+- `~/mtaa-scraping-tool/output` on Linux/macOS
+- `%USERPROFILE%\mtaa-scraping-tool\output` on Windows
 
 ## Notes
 
