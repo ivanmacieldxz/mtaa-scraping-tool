@@ -67,7 +67,9 @@ def html_to_markdown(html):
         return "".join(render(child) for child in node.children)
 
     markdown = render(soup)
-    markdown = re.sub(r"\n{3,}", "\n\n", markdown).strip() + "\n"
+    markdown = re.sub(r"\n{3,}", "\n\n", markdown).strip()
+    markdown = re.sub(r"\t{2,}", "\t", markdown).strip()
+    markdown = re.sub(r" {2,}", " ", markdown).strip() + "\n"
     return markdown
 
 
