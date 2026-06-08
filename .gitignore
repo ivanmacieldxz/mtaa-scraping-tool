@@ -1,0 +1,28 @@
+# --- venvs ---
+# Ignora la carpeta donde se instalan las librerías (requests, beautifulsoup, etc.)
+.venv/
+venv/
+env/
+ENV/
+
+# --- Caché de Python ---
+# Python genera estos archivos compilados para ejecutar más rápido; no van al repositorio
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Configuración de Entorno e Información Sensible ---
+# Si a futuro usás contraseñas, tokens de API o claves, van acá y NO se suben
+.env
+.env.secret
+
+# --- Herramientas de desarrollo / Editores ---
+# Ignora configuraciones específicas de tu editor de código (VS Code, PyCharm)
+.vscode/
+.idea/
+.DS_Store
+
+# --- Archivos de logs ---
+# Si tu script genera reportes de errores en texto, es mejor no trackearlos
+*.log
