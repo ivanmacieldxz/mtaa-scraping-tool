@@ -1,17 +1,19 @@
 # Scraping Tool
 
-A simple Python tool to extract information from a web page.
+A simple Python command-line tool to extract the main text from a web page and save it as Markdown.
 
 ## Current features
 
 - HTTP connection to a URL provided via command line.
-- Extraction of the page title.
-- Printing the page text content to the console.
+- Extraction of the page's main content using `readability-lxml`.
+- Saving the cleaned main content to a Markdown file.
+- Separation of concerns: `scraper.py` fetches HTML, `content_processor.py` processes and saves it.
 
-## Planned features
+## Files
 
-- Graphical user interface for easier use.
-- Download scraping results as PDF or Markdown.
+- `main.py`: command-line entrypoint.
+- `scraper.py`: downloads raw HTML from the provided URL.
+- `content_processor.py`: extracts the main article text and writes Markdown.
 
 ## Requirements
 
@@ -19,6 +21,7 @@ A simple Python tool to extract information from a web page.
 - Libraries:
   - `requests`
   - `beautifulsoup4`
+  - `readability-lxml`
 
 ## Virtual environment setup
 
@@ -39,26 +42,33 @@ A simple Python tool to extract information from a web page.
 
 4. Install dependencies:
    ```bash
-   pip install requests beautifulsoup4
+   pip install requests beautifulsoup4 readability-lxml
    ```
 
 ## Usage
 
-Run the script with the URL you want to analyze as an argument:
+Run the tool with the URL you want to analyze:
 
 ```bash
-python scraper.py https://example.com
+python main.py https://example.com
+```
+
+To save the output in a specific folder:
+
+```bash
+python main.py https://example.com --output-dir output
 ```
 
 ### Example
 
 ```bash
-python scraper.py https://www.python.org
+python main.py https://www.python.org
 ```
 
-The script will print the page title and extracted text content to the console.
+The script will create a Markdown file named after the page title in the current folder by default.
 
 ## Notes
 
-- Currently the tool works as a command-line application.
-- A graphical interface and export to PDF/Markdown are planned as future improvements.
+- `main.py` is now the entrypoint.
+- The tool saves the extracted main article text as Markdown.
+- Future improvements can include PDF export or a GUI.
