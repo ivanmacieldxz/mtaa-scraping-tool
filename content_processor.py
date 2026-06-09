@@ -25,11 +25,11 @@ def html_to_markdown(html):
 
         if name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
             level = int(name[1])
-            text = node.get_text(" ", strip=True)
-            return f"{('#' * level)} {text}\n\n"
+            text = "".join(render(child) for child in node.children).strip()
+            return f"{('#' * level)} {text}\n\n" if text else ""
 
         if name == "p":
-            text = node.get_text(" ", strip=True)
+            text = "".join(render(child) for child in node.children).strip()
             return f"{text}\n\n" if text else ""
 
         if name == "br":
@@ -44,9 +44,9 @@ def html_to_markdown(html):
             return "".join(items) + "\n"
 
         if name == "a":
-            href = node.get("href", "")
+            href = node.get("href", "").strip()
             text = node.get_text(" ", strip=True) or href
-            return f"[{text}]({href})" if href else text
+            return f"{text} [{href}]" if href else text
 
         if name in {"strong", "b"}:
             return f"**{node.get_text(' ', strip=True)}**"
