@@ -174,14 +174,19 @@ class MainWindow(QMainWindow):
         self.browse_button = StyledButton("Seleccionar carpeta")
         self.browse_button.clicked.connect(self.choose_output_dir)
 
-        self.scrape_button = StyledButton("Extraer Markdown", primary=True)
+        self.scrape_button = StyledButton("Extraer Contenido en md", primary=True)
         self.scrape_button.clicked.connect(self.start_scraping)
         self.scrape_button.setMinimumHeight(44)
 
-        self.open_file_button = StyledButton("Abrir archivo")
+        self.open_file_button = StyledButton("Abrir Markdown")
         self.open_file_button.setEnabled(False)
         self.open_file_button.clicked.connect(self.open_last_file)
         self.open_file_button.setMinimumHeight(44)
+
+        self.open_json_button = StyledButton("Abrir JSON")
+        self.open_json_button.setEnabled(False)
+        self.open_json_button.clicked.connect(self.open_last_json)
+        self.open_json_button.setMinimumHeight(44)
 
         self.status_message = QLabel("Listo")
         self.status_message.setWordWrap(True)
@@ -205,6 +210,7 @@ class MainWindow(QMainWindow):
         self.thread = None
         self.worker = None
         self.last_output_file = None
+        self.last_json_file = None
 
     def setup_ui(self):
         """Build UI with original layout and Material 3 styling."""
@@ -245,8 +251,9 @@ class MainWindow(QMainWindow):
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(8)
         button_layout.addStretch()
-        button_layout.addWidget(self.scrape_button)
         button_layout.addWidget(self.open_file_button)
+        button_layout.addWidget(self.open_json_button)
+        button_layout.addWidget(self.scrape_button)
         main_layout.addLayout(button_layout)
 
         # Log section
@@ -358,7 +365,9 @@ class MainWindow(QMainWindow):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
         self.last_output_file = None
+        self.last_json_file = None
         self.open_file_button.setEnabled(False)
+        self.open_json_button.setEnabled(False)
 
     def set_controls_enabled(self, enabled: bool):
         self.url_input.setEnabled(enabled)
@@ -368,10 +377,13 @@ class MainWindow(QMainWindow):
 
     def on_scrape_success(self, message: str, filepath: str):
         self.last_output_file = filepath
+        # Generate JSON filepath from markdown filepath
+        self.last_json_file = filepath.replace(".md", ".json")
         self.append_log(f"✓ {message}")
         self.status_message.setText("✓ Extracción completada")
         self.status_message.setStyleSheet("color: #80c784; font-size: 13px; font-weight: 500;")
         self.open_file_button.setEnabled(True)
+        self.open_json_button.setEnabled(True)
         self.show_information("Éxito", message)
         self.set_controls_enabled(True)
 
@@ -397,6 +409,22 @@ class MainWindow(QMainWindow):
             return
 
         QDesktopServices.openUrl(QUrl.fromLocalFile(self.last_output_file))
+
+    def open_last_json(self):
+        if not self.last_json_file:
+            self.show_warning(
+                "Archivo no disponible", "No hay un JSON generado para abrir."
+            )
+            return
+
+        if not os.path.exists(self.last_json_file):
+            self.show_warning(
+                "Archivo no encontrado", "El JSON generado ya no existe."
+            )
+            self.open_json_button.setEnabled(False)
+            return
+
+        QDesktopServices.openUrl(QUrl.fromLocalFile(self.last_json_file))
 
 
 def main():
