@@ -110,8 +110,11 @@ def save_markdown_from_html(html, output_dir=".", url=""):
     json_filepath = os.path.join(output_dir, json_filename)
     json_metadata = {
         "url": url,
-        "titulo": filename_title
+        "title": filename_title
     }
+    # Añadir nombre del archivo MD generado y del archivo JSON de metadatos
+    json_metadata["file"] = filename
+    json_metadata["metadata-file"] = json_filename
     with open(json_filepath, "w", encoding="utf-8") as json_file:
         json.dump(json_metadata, json_file, ensure_ascii=False, indent=2)
 
