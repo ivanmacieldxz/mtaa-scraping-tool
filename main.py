@@ -272,6 +272,54 @@ class MainWindow(QMainWindow):
         if folder:
             self.output_dir_input.setText(folder)
 
+    def show_warning(self, title: str, message: str):
+        """Show styled warning dialog."""
+        msg_box = QMessageBox(QMessageBox.Warning, title, message, QMessageBox.Ok, self)
+        self._apply_dialog_style(msg_box)
+        msg_box.exec()
+
+    def show_information(self, title: str, message: str):
+        """Show styled information dialog."""
+        msg_box = QMessageBox(QMessageBox.Information, title, message, QMessageBox.Ok, self)
+        self._apply_dialog_style(msg_box)
+        msg_box.exec()
+
+    def show_critical(self, title: str, message: str):
+        """Show styled critical dialog."""
+        msg_box = QMessageBox(QMessageBox.Critical, title, message, QMessageBox.Ok, self)
+        self._apply_dialog_style(msg_box)
+        msg_box.exec()
+
+    def _apply_dialog_style(self, dialog: QMessageBox):
+        """Apply Material 3 styling to dialog."""
+        dialog.setMinimumWidth(400)
+        dialog.setMinimumHeight(150)
+        dialog.setStyleSheet(
+            """
+            QMessageBox {
+                background-color: #1e1e1e;
+            }
+            QMessageBox QLabel {
+                color: #e0e0e0;
+            }
+            QMessageBox QPushButton {
+                background-color: #80c784;
+                color: #000000;
+                border: none;
+                border-radius: 6px;
+                padding: 6px 16px;
+                font-weight: 500;
+                min-width: 60px;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #81c784;
+            }
+            QMessageBox QPushButton:pressed {
+                background-color: #7cb342;
+            }
+            """
+        )
+
     def append_log(self, text: str):
         self.log_output.append(text)
         self.log_output.verticalScrollBar().setValue(
@@ -283,12 +331,12 @@ class MainWindow(QMainWindow):
         output_dir = self.output_dir_input.text().strip() or self._default_output_dir
 
         if not url:
-            QMessageBox.warning(self, "URL requerida", "Por favor ingresa una URL válida.")
+            self.show_warning("URL requerida", "Por favor ingresa una URL válida.")
             return
 
         if not output_dir:
-            QMessageBox.warning(
-                self, "Directorio requerido", "Por favor selecciona un directorio de salida."
+            self.show_warning(
+                "Directorio requerido", "Por favor selecciona un directorio de salida."
             )
             return
 
@@ -324,26 +372,26 @@ class MainWindow(QMainWindow):
         self.status_message.setText("✓ Extracción completada")
         self.status_message.setStyleSheet("color: #80c784; font-size: 13px; font-weight: 500;")
         self.open_file_button.setEnabled(True)
-        QMessageBox.information(self, "Éxito", message)
+        self.show_information("Éxito", message)
         self.set_controls_enabled(True)
 
     def on_scrape_error(self, error_text: str):
         self.append_log(f"✗ Error: {error_text}")
         self.status_message.setText("✗ Error durante la extracción")
         self.status_message.setStyleSheet("color: #ef5350; font-size: 13px; font-weight: 500;")
-        QMessageBox.critical(self, "Error", f"Error procesando el contenido:\n{error_text}")
+        self.show_critical("Error", f"Error procesando el contenido:\n{error_text}")
         self.set_controls_enabled(True)
 
     def open_last_file(self):
         if not self.last_output_file:
-            QMessageBox.warning(
-                self, "Archivo no disponible", "No hay un archivo generado para abrir."
+            self.show_warning(
+                "Archivo no disponible", "No hay un archivo generado para abrir."
             )
             return
 
         if not os.path.exists(self.last_output_file):
-            QMessageBox.warning(
-                self, "Archivo no encontrado", "El archivo generado ya no existe."
+            self.show_warning(
+                "Archivo no encontrado", "El archivo generado ya no existe."
             )
             self.open_file_button.setEnabled(False)
             return
