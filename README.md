@@ -1,27 +1,33 @@
 # Scraping Tool
 
-A simple Python command-line tool to extract the main text from a web page and save it as Markdown.
+A desktop Python application that extracts the main content of a web page and saves it as Markdown, with JSON metadata.
 
 ## Current features
 
-- HTTP connection to a URL provided via command line.
-- Extraction of the page's main content using `readability-lxml`.
-- Saving the cleaned main content to a Markdown file.
-- Separation of concerns: `scraper.py` fetches HTML, `content_processor.py` processes and saves it.
+- Graphical user interface built with `PySide6`.
+- Download HTML from a provided URL using `requests`.
+- Extract the main article content using `readability-lxml`.
+- Convert HTML to Markdown using `BeautifulSoup`.
+- Save the extracted content as a `.md` file.
+- Save metadata such as URL, title, Markdown filename, and metadata filename as a `.json` file.
+- Open the generated Markdown and JSON files directly from the app.
+- Material theme support with `qt-material`.
 
 ## Files
 
-- `main.py`: command-line entrypoint.
+- `main.py`: main GUI application and scraping workflow.
 - `scraper.py`: downloads raw HTML from the provided URL.
-- `content_processor.py`: extracts the main article text and writes Markdown.
+- `content_processor.py`: processes HTML and saves Markdown and JSON.
 
 ## Requirements
 
-- Python 3.8+ (using a virtual environment is recommended).
-- Libraries:
+- Python 3.8 or newer.
+- Python packages:
   - `requests`
   - `beautifulsoup4`
   - `readability-lxml`
+  - `PySide6`
+  - `qt-material` (optional for improved styling)
 
 ## Virtual environment setup
 
@@ -40,38 +46,33 @@ A simple Python command-line tool to extract the main text from a web page and s
    source .venv/bin/activate
    ```
 
-4. Install dependencies:
+4. Install the required dependencies:
    ```bash
-   pip install requests beautifulsoup4 readability-lxml
+   pip install requests beautifulsoup4 readability-lxml PySide6
+
+   pip install qt-material
    ```
 
 ## Usage
 
-Run the tool with the URL you want to analyze:
+With the virtual environment activated, run:
 
 ```bash
-python main.py https://example.com
+python main.py
 ```
 
-To save the output in a specific folder:
+Then:
 
-```bash
-python main.py https://example.com --output-dir output
-```
+1. Enter the URL of the page to scrape.
+2. Choose or confirm the output directory.
+3. Click `Extraer Contenido en md`.
+4. Open the generated Markdown and JSON files using the app buttons.
 
-### Example
+## Default output location
 
-```bash
-python main.py https://www.python.org
-```
-
-By default, the script saves the extracted Markdown under your user home directory at:
+The default output directory is:
 
 - `~/mtaa-scraping-tool/output` on Linux/macOS
 - `%USERPROFILE%\mtaa-scraping-tool\output` on Windows
 
-## Notes
-
-- `main.py` is now the entrypoint.
-- The tool saves the extracted main article text as Markdown.
-- Future improvements can include PDF export or a GUI.
+If you want to save files elsewhere, choose a different folder in the app.
