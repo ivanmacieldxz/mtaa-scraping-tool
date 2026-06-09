@@ -147,7 +147,7 @@ class ScrapeWorker(QObject):
     def run(self):
         try:
             html = extract_info(self.url)
-            filepath, title = save_markdown_from_html(html, output_dir=self.output_dir)
+            filepath, title = save_markdown_from_html(html, output_dir=self.output_dir, url=self.url)
             message = f"Guardado como: {filepath}\nTítulo: {title}"
             self.finished.emit(message, filepath)
         except Exception as err:

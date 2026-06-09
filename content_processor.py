@@ -1,5 +1,6 @@
 import os
 import re
+import json
 from bs4 import BeautifulSoup, NavigableString
 from readability import Document
 
@@ -79,8 +80,8 @@ def first_heading_text(html):
     return heading.get_text(" ", strip=True) if heading else None
 
 
-def save_markdown_from_html(html, output_dir="."):
-    """Process HTML with readability and save the main content as Markdown."""
+def save_markdown_from_html(html, output_dir=".", url=""):
+    """Process HTML with readability and save the main content as Markdown and JSON metadata."""
     doc = Document(html)
     page_title = doc.short_title()
     summary_html = doc.summary()
@@ -103,5 +104,15 @@ def save_markdown_from_html(html, output_dir="."):
 
     with open(filepath, "w", encoding="utf-8") as md_file:
         md_file.write(main_text)
+
+    # Save JSON metadata with same filename
+    json_filename = filename.replace(".md", ".json")
+    json_filepath = os.path.join(output_dir, json_filename)
+    json_metadata = {
+        "url": url,
+        "titulo": filename_title
+    }
+    with open(json_filepath, "w", encoding="utf-8") as json_file:
+        json.dump(json_metadata, json_file, ensure_ascii=False, indent=2)
 
     return filepath, filename_title
