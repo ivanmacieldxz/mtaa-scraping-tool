@@ -3,7 +3,8 @@ from pathlib import Path
 from scraper import extract_info
 from content_processor import save_markdown_from_html
 
-from PySide6.QtCore import QObject, QThread, Signal
+from PySide6.QtCore import QObject, QThread, QUrl, Signal
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
     QHBoxLayout,
@@ -25,7 +26,7 @@ except ImportError:
 
 
 class ScrapeWorker(QObject):
-    finished = Signal(str)
+    finished = Signal(str, str)
     error = Signal(str)
 
     def __init__(self, url: str, output_dir: str):
@@ -38,7 +39,7 @@ class ScrapeWorker(QObject):
             html = extract_info(self.url)
             filepath, title = save_markdown_from_html(html, output_dir=self.output_dir)
             message = f"Guardado como: {filepath}\nTítulo: {title}"
-            self.finished.emit(message)
+            self.finished.emit(message, filepath)
         except Exception as err:
             self.error.emit(str(err))
 
@@ -62,6 +63,10 @@ class MainWindow(QMainWindow):
         self.scrape_button = QPushButton("Extraer y guardar Markdown")
         self.scrape_button.clicked.connect(self.start_scraping)
 
+        self.open_file_button = QPushButton("Abrir archivo generado")
+        self.open_file_button.setEnabled(False)
+        self.open_file_button.clicked.connect(self.open_last_file)
+
         self.status_message = QLabel("Listo.")
         self.status_message.setWordWrap(True)
 
@@ -73,6 +78,7 @@ class MainWindow(QMainWindow):
 
         self.thread = None
         self.worker = None
+        self.last_output_file = None
 
     def setup_ui(self):
         url_layout = QVBoxLayout()
@@ -87,6 +93,7 @@ class MainWindow(QMainWindow):
         button_layout = QHBoxLayout()
         button_layout.addStretch()
         button_layout.addWidget(self.scrape_button)
+        button_layout.addWidget(self.open_file_button)
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(url_layout)
@@ -138,6 +145,8 @@ class MainWindow(QMainWindow):
         self.worker.error.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
+        self.last_output_file = None
+        self.open_file_button.setEnabled(False)
 
     def set_controls_enabled(self, enabled: bool):
         self.url_input.setEnabled(enabled)
@@ -145,9 +154,11 @@ class MainWindow(QMainWindow):
         self.browse_button.setEnabled(enabled)
         self.scrape_button.setEnabled(enabled)
 
-    def on_scrape_success(self, message: str):
+    def on_scrape_success(self, message: str, filepath: str):
+        self.last_output_file = filepath
         self.append_log(f"✔ {message}")
         self.status_message.setText("Extracción completada.")
+        self.open_file_button.setEnabled(True)
         QMessageBox.information(self, "Éxito", message)
         self.set_controls_enabled(True)
 
@@ -156,6 +167,18 @@ class MainWindow(QMainWindow):
         self.status_message.setText("Ocurrió un error durante la extracción.")
         QMessageBox.critical(self, "Error", f"Error procesando el contenido:\n{error_text}")
         self.set_controls_enabled(True)
+
+    def open_last_file(self):
+        if not self.last_output_file:
+            QMessageBox.warning(self, "Archivo no disponible", "No hay un archivo generado para abrir.")
+            return
+
+        if not os.path.exists(self.last_output_file):
+            QMessageBox.warning(self, "Archivo no encontrado", "El archivo generado ya no existe.")
+            self.open_file_button.setEnabled(False)
+            return
+
+        QDesktopServices.openUrl(QUrl.fromLocalFile(self.last_output_file))
 
 
 def main():
