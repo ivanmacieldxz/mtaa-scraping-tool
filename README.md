@@ -26,6 +26,7 @@ A desktop Python application that extracts the main content of a web page and sa
   - `requests`
   - `beautifulsoup4`
   - `readability-lxml`
+  - `html2text`
   - `PySide6`
   - `qt-material` (optional for improved styling)
 
@@ -48,7 +49,7 @@ A desktop Python application that extracts the main content of a web page and sa
 
 4. Install the required dependencies:
    ```bash
-   pip install requests beautifulsoup4 readability-lxml PySide6
+   pip install requests beautifulsoup4 readability-lxml html2text PySide6
 
    pip install qt-material
    ```

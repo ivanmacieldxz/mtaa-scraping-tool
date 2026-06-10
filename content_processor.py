@@ -1,8 +1,9 @@
 import os
 import re
 import json
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup
 from readability import Document
+from html2text import HTML2Text, escape_md, urlparse
 
 
 def slugify(text):
@@ -13,64 +14,28 @@ def slugify(text):
 
 
 def html_to_markdown(html):
-    soup = BeautifulSoup(html, "html.parser")
+    converter = HTML2Text()
+    converter.body_width = 0
+    converter.unicode_snob = True
+    converter.single_line_break = True
+    converter.inline_links = True
+    converter.protect_links = False
+    converter.ignore_images = True
+    converter.ignore_links = False
 
-    def render(node):
-        if isinstance(node, NavigableString):
-            return str(node)
+    markdown = converter.handle(html)
+    markdown = re.sub(r"\n{3,}", "\n\n", markdown).strip() + "\n"
 
-        name = node.name.lower() if node.name else None
-        if not name:
-            return ""
+    def strip_link_title(match):
+        text = match.group(1)
+        url = match.group(2) or match.group(3) or ""
+        return f"[{text}]({url})"
 
-        if name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
-            level = int(name[1])
-            text = "".join(render(child) for child in node.children).strip()
-            return f"{('#' * level)} {text}\n\n" if text else ""
-
-        if name == "p":
-            text = "".join(render(child) for child in node.children).strip()
-            return f"{text}\n\n" if text else ""
-
-        if name == "br":
-            return "\n"
-
-        if name == "li":
-            text = "".join(render(child) for child in node.children).strip()
-            return f"- {text}\n"
-
-        if name in {"ul", "ol"}:
-            items = [render(child) for child in node.children if getattr(child, "name", None) == "li"]
-            return "".join(items) + "\n"
-
-        if name == "a":
-            href = node.get("href", "").strip()
-            text = node.get_text(" ", strip=True) or href
-            return f"{text} [{href}]" if href else text
-
-        if name in {"strong", "b"}:
-            return f"**{node.get_text(' ', strip=True)}**"
-
-        if name in {"em", "i"}:
-            return f"*{node.get_text(' ', strip=True)}*"
-
-        if name == "code" and node.parent and node.parent.name != "pre":
-            return f"`{node.get_text(' ', strip=True)}`"
-
-        if name == "pre":
-            text = node.get_text("\n", strip=True)
-            return f"```\n{text}\n```\n\n"
-
-        if name in {"div", "section", "article", "header", "main", "footer", "blockquote", "figure"}:
-            content = "".join(render(child) for child in node.children).strip()
-            return f"{content}\n\n" if content else ""
-
-        return "".join(render(child) for child in node.children)
-
-    markdown = render(soup)
-    markdown = re.sub(r"\n{3,}", "\n\n", markdown).strip()
-    markdown = re.sub(r"\t{2,}", "\t", markdown).strip()
-    markdown = re.sub(r" {2,}", " ", markdown).strip() + "\n"
+    markdown = re.sub(
+        r"\[([^\]]+)\]\((?:<([^>]+)>|([^\)\s]+))(?:\s+\"[^\"]*\")?\)",
+        strip_link_title,
+        markdown,
+    )
     return markdown
 
 
